@@ -57,19 +57,16 @@ class Dimensions
      *   deprecated=false
      * )
      */
+    private $code = 200;
     public function get($rest)
     {
-        $req = $rest->request();
-
-        $page = $req->get("page");
-
-        if ($page == null) {
-            $this->all();
-        } else {
-            // If page = 1 the value will be 0, if page = 2 the value will be 1, ...
-            $from = -- $page * RESULTS_PER_PAGE;
-            $this->all($from);
+        $dbResult = get_dimensions();
+        $result = array();
+        while ($row = db_fetch_assoc($dbResult)) {
+            $result[] = $row;
         }
+        echo api_response($this->code,["data"=>$result]);
+        return 1;
     }
 
     /**

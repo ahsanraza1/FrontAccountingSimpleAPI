@@ -9,8 +9,25 @@ include_once($path_to_root . "/includes/db/crm_contacts_db.inc");
 class Customers
 {
     // Get Items
+    public function getAll()
+    {
+        
+        $sql = "SELECT DISTINCT( debtor_no ) as person_id, branch_code as person_detail_id FROM `".TB_PREF."cust_branch`";
+        
+        $query = db_query($sql, "error");
+
+        $info = array();
+
+        while ($data = db_fetch_assoc($query, "error")) {
+            $info[] = $data;
+        }
+
+        api_success_response(json_encode($info));
+    }
     public function get($rest)
     {
+        $this->getAll();
+        return 1;
         $req = $rest->request();
 
         $page = $req->get("page");

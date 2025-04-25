@@ -1,4 +1,7 @@
 <?php
+
+use FAAPI\Account;
+use FAAPI\Deposit;
 use FAAPI\Inventory;
 use FAAPI\InventoryLocations;
 use FAAPI\Category;
@@ -15,6 +18,7 @@ use FAAPI\Dimensions;
 use FAAPI\Journal;
 use FAAPI\ExchangeRates;
 use FAAPI\GLQueries;
+use FAAPI\Payment;
 
 /**********************************************
 Author: Andres Amaya
@@ -94,117 +98,7 @@ $rest->add(new JsonToFormData());
 $rest->add(new \Slim\Middleware\ContentTypes());
 
 // API Routes
-// ---------------------------------- Items -----------------------------------
-$rest->container->singleton('inventory', function () {
-    return new Inventory();
-});
-$rest->group('/inventory', function () use ($rest) {
-    // Get Items
-    $rest->get('/', function () use ($rest) {
-        $rest->inventory->get($rest);
-    });
-    // Get Specific Item by Stock Id
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->inventory->getById($rest, $id);
-    });
-    // Add Item
-    $rest->post('/', function () use ($rest) {
-        $rest->inventory->post($rest);
-    });
-    // Edit Specific Item
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->inventory->put($rest, $id);
-    });
-    // Delete Specific Item
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->inventory->delete($rest, $id);
-    });
-});
-// ---------------------------------- Items -----------------------------------
 
-// ---------------------------- Inventory Locations ---------------------------
-$rest->container->singleton('inventoryLocations', function () {
-    return new InventoryLocations();
-});
-$rest->group('/locations', function () use ($rest) {
-    // Get Locations
-    $rest->get('/', function () use ($rest) {
-        $rest->inventoryLocations->get($rest);
-    });
-
-    // Add Location, added by Richard Vinke
-    $rest->post('/', function () use ($rest) {
-        $rest->inventoryLocations->post($rest);
-    });
-});
-// ---------------------------- Inventory Locations ---------------------------
-
-// ----------------------------- Stock Adjustments ----------------------------
-// Add Stock Adjustment
-$rest->post('/stock/', function () use ($rest) {
-    include_once(API_ROOT . "/inventory.inc");
-    stock_adjustment_add();
-});
-// ----------------------------- Stock Adjustments ----------------------------
-
-// ------------------------------ Item Categories -----------------------------
-$rest->container->singleton('category', function () {
-    return new Category();
-});
-$rest->group('/category', function () use ($rest) {
-    // Get Items Categories
-    $rest->get('/', function () use ($rest) {
-        $rest->category->get($rest);
-    });
-    // Get Specific Item Category
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->category->getById($rest, $id);
-    });
-    // Add Item Category
-    $rest->post('/', function () use ($rest) {
-        $rest->category->post($rest);
-    });
-    // Edit Item Category
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->category->put($rest, $id);
-    });
-    // Delete Item Category
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->category->delete($rest, $id);
-    });
-});
-// ------------------------------ Item Categories -----------------------------
-
-// --------------------------------- Tax Types --------------------------------
-// Tax Types
-$rest->container->singleton('taxTypes', function () {
-    return new TaxTypes();
-});
-$rest->group('/taxtypes', function () use ($rest) {
-    // Get All Item Tax Types
-    $rest->get('/', function () use ($rest) {
-        $rest->taxTypes->get($rest);
-    });
-    // Get Specific Tax Type
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->taxTypes->getById($rest, $id);
-    });
-});
-// --------------------------------- Tax Types --------------------------------
-
-// --------------------------------- Tax Groups -------------------------------
-// Tax Groups
-$rest->container->singleton('taxGroups', function () {
-    return new TaxGroups();
-});
-
-// Get All Tax Groups
-$rest->get('/taxgroups/', function () use ($rest) {
-    $rest->taxGroups->get($rest);
-});
-// --------------------------------- Tax Groups -------------------------------
-
-// --------------------------------- Customers --------------------------------
 $rest->container->singleton('customers', function () {
     return new Customers();
 });
@@ -217,256 +111,26 @@ $rest->group('/customers', function () use ($rest) {
     $rest->get('/', function () use ($rest) {
         $rest->customers->get($rest);
     });
-    // Add Customer
-    $rest->post('/', function () use ($rest) {
-        $rest->customers->post($rest);
-    });
-    // Edit Customer
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->customers->put($rest, $id);
-    });
-    // Delete Customer
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->customers->delete($rest, $id);
-    });
-    // Get Customer Branches
-    $rest->get('/:id/branches/', function ($id) use ($rest) {
-        $rest->customers->getBranches($rest, $id);
-    });
+    // // Add Customer
+    // $rest->post('/', function () use ($rest) {
+    //     $rest->customers->post($rest);
+    // });
+    // // Edit Customer
+    // $rest->put('/:id', function ($id) use ($rest) {
+    //     $rest->customers->put($rest, $id);
+    // });
+    // // Delete Customer
+    // $rest->delete('/:id', function ($id) use ($rest) {
+    //     $rest->customers->delete($rest, $id);
+    // });
+    // // Get Customer Branches
+    // $rest->get('/:id/branches/', function ($id) use ($rest) {
+    //     $rest->customers->getBranches($rest, $id);
+    // });
 });
 // --------------------------------- Customers --------------------------------
 
-// --------------------------------- Suppliers --------------------------------
-$rest->container->singleton('suppliers', function () {
-    return new Suppliers();
-});
-$rest->group('/suppliers', function () use ($rest) {
-    // All Suppliers
-    $rest->get('/', function () use ($rest) {
-        $rest->suppliers->get($rest);
-    });
-    // Get Supplier General Info
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->suppliers->getById($rest, $id);
-    });
-    // Add Supplier
-    $rest->post('/', function () use ($rest) {
-        $rest->suppliers->post($rest);
-    });
-    // Edit Supplier
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->suppliers->put($rest, $id);
-    });
-    // Delete Supplier
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->suppliers->delete($rest, $id);
-    });
-    // Get Supplier Contacts
-    $rest->get('/:id/contacts/', function ($id) use ($rest) {
-        $rest->suppliers->getContacts($rest, $id);
-    });
-});
-// --------------------------------- Suppliers --------------------------------
-
-// ------------------------------- Bank Accounts ------------------------------
-$rest->container->singleton('bankAccounts', function () {
-    return new BankAccounts();
-});
-$rest->group('/bankaccounts', function () use ($rest) {
-    // Get All Bank Accounts
-    $rest->get('/', function () use ($rest) {
-        $rest->bankAccounts->get($rest);
-    });
-    // Get Specific Bank Account
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->bankAccounts->getById($rest, $id);
-    });
-    // Insert Bank Account
-    $rest->post('/', function () use ($rest) {
-        $rest->bankAccounts->post($rest);
-    });
-    // Update Bank Account
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->bankAccounts->put($rest, $id);
-    });
-    // Delete Bank Account
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->bankAccounts->delete($rest, $id);
-    });
-});
-// ------------------------------- Bank Accounts ------------------------------
-
-// -------------------------------- GL Accounts -------------------------------
-$rest->container->singleton('glAccounts', function () {
-    return new GLAccounts();
-});
-$rest->group('/glaccounts', function () use ($rest) {
-    // Get All GL Accounts
-    $rest->get('/', function () use ($rest) {
-        $rest->glAccounts->get($rest);
-    });
-    // Get Specific GL Account
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->glAccounts->getById($rest, $id);
-    });
-    // Insert GL Account
-    $rest->post('/', function () use ($rest) {
-        $rest->glAccounts->post($rest);
-    });
-    // Update GL Account
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->glAccounts->put($rest, $id);
-    });
-    // Delete GL Account
-    $rest->delete('/:id', function ($id) use ($rest) {
-        $rest->glAccounts->delete($rest, $id);
-    });
-});
-// Get GL Account Types
-$rest->get('/glaccounttypes/', function () use ($rest) {
-    $rest->glAccounts->getTypes($rest);
-});
-$rest->container->singleton('glQueries', function () {
-    return new GLQueries();
-});
-$rest->group('/glquery', function () use ($rest) {
-    // Get Trial Balance
-    $rest->get('/trialbalance/:start/:end/', function ($start, $end) use ($rest) {
-        $rest->glQueries->trialBalance($rest, $start, $end);
-    });
-});
-// -------------------------------- GL Accounts -------------------------------
-
-// -------------------------------- Currencies --------------------------------
-$rest->container->singleton('currencies', function () {
-    return new Currencies();
-});
-$rest->group('/currencies', function () use ($rest) {
-    // Get All Currencies
-    $rest->get('/', function () use ($rest) {
-        $rest->currencies->get($rest);
-    });
-    // Get Specific Currency
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->currencies->getById($rest, $id);
-    });
-});
-// -------------------------------- Currencies --------------------------------
-// ------------------------------ Exchange Rates ------------------------------
-$rest->container->singleton('exchangerates', function () {
-    return new ExchangeRates();
-});
-$rest->group('/exchangerates', function () use ($rest) {
-    // Get Current ExchangeRate
-    $rest->get('/:currency/current', function ($currency) use ($rest) {
-        $rest->exchangerates->getCurrent($rest, $currency);
-    });
-    // Get ExchangeRate
-    $rest->get('/:currency/:id', function ($currency, $id) use ($rest) {
-        $rest->exchangerates->getById($rest, $currency, $id);
-    });
-    // Insert ExchangeRate
-    $rest->post('/:currency/', function ($currency) use ($rest) {
-        $rest->exchangerates->post($rest, $currency);
-    });
-    // Edit ExchangeRate
-    $rest->put('/:currency/:id', function ($currency, $id) use ($rest) {
-        $rest->exchangerates->put($rest, $currency, $id);
-    });
-    // Delete ExchangeRate
-    $rest->delete('/:currency/:id', function ($currency, $id) use ($rest) {
-        $rest->exchangerates->delete($rest, $currency, $id);
-    });
-    // All exchangerates for the given currency
-    $rest->get('/:currency/', function ($currency) use ($rest) {
-        $rest->exchangerates->getAllByCurrency($rest, $currency);
-    });
-});
-// Get Last Exchange Rate (Legacy route)
-$rest->get('/exrates/:curr_abrev', function ($curr_abrev) use ($rest) {
-    $rest->currencies->getLastExchangeRate($rest, $curr_abrev);
-});
-// ------------------------------ Exchange Rates ------------------------------
-
-// ----- ------------------------ Inventory Costs -----------------------------
-$rest->container->singleton('inventoryCosts', function () {
-    return new InventoryCosts();
-});
-$rest->group('/itemcosts', function () use ($rest) {
-    // Get Item Cost
-    $rest->get('/:id', function ($id) use ($rest) {
-        $rest->inventoryCosts->getById($rest, $id);
-    });
-    // Update Item Cost
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->inventoryCosts->put($rest, $id);
-    });
-});
-// ----- ------------------------ Inventory Costs -----------------------------
-
 // ------------------------------- Assets -------------------------------
-// Fixed Assets
-function assets_supported()
-{
-    global $path_to_root;
-    return file_exists($path_to_root . '/modules/asset_register');
-}
-if (assets_supported()) {
-    // Get Fixed Asset
-    $rest->get('/assets/:id', function ($id) use ($rest) {
-        include_once(API_ROOT . "/assets.inc");
-        assets_get($id);
-    });
-    // Insert Fixed Asset
-    $rest->post('/assets/', function () use ($rest) {
-        include_once(API_ROOT . "/assets.inc");
-        assets_add();
-    });
-    // Get Asset Types
-    $rest->get('/assettypes/', function () use ($rest) {
-        global $req;
-        include_once(API_ROOT . "/assets.inc");
-
-        $page = $req->get("page");
-
-        if ($page == null) {
-            assettypes_all();
-        } else {
-            // If page = 1 the value will be 0, if page = 2 the value will be 1, ...
-            $from = -- $page * RESULTS_PER_PAGE;
-            assettypes_all($from);
-        }
-    });
-}
-// ------------------------------- Assets -------------------------------
-
-// ------------------------------- Sales --------------------------------
-$rest->container->singleton('sales', function () {
-    return new Sales();
-});
-$rest->group('/sales', function () use ($rest) {
-    // Get Sales Header and Details
-    $rest->get('/:trans_no/:trans_type', function ($trans_no, $trans_type) use ($rest) {
-        $rest->sales->getById($rest, $trans_no, $trans_type);
-    });
-    // Insert Sales
-    $rest->post('/', function () use ($rest) {
-        $rest->sales->post($rest);
-    });
-    // Edit Sales
-    $rest->put('/:trans_no/:trans_type', function ($trans_no, $trans_type) use ($rest) {
-        $rest->sales->put($rest, $trans_no, $trans_type);
-    });
-    // Cancel Sales
-    $rest->delete('/:branch_id/:uuid', function ($branch_id, $uuid) use ($rest) {
-        $rest->sales->delete($rest, $branch_id, $uuid);
-    });
-    // All Sales
-    $rest->get('/:trans_type/', function ($trans_type) use ($rest) {
-        $rest->sales->get($rest, $trans_type);
-    });
-});
-// ------------------------------- Sales --------------------------------
 
 // ----------------------------- Dimensions -----------------------------
 $rest->container->singleton('dimensions', function () {
@@ -496,33 +160,53 @@ $rest->group('/dimensions', function () use ($rest) {
 });
 // ----------------------------- Dimensions -----------------------------
 
-// ------------------------------ Journal -------------------------------
-$rest->container->singleton('journal', function () {
-    return new Journal();
+// ------------------------------ Payment -------------------------------
+$rest->container->singleton('payment', function () {
+    return new Payment();
 });
-$rest->group('/journal', function () use ($rest) {
-    // Get All Journal Entries
-    $rest->get('/', function () use ($rest) {
-        $rest->journal->get($rest);
-    });
-    // Get Specific Journal Entry
-    $rest->get('/:type/:id', function ($type, $id) use ($rest) {
-        $rest->journal->getById($rest, $type, $id);
-    });
+$rest->group('/payment', function () use ($rest) {
     // Insert Journal Entry
     $rest->post('/', function () use ($rest) {
-        $rest->journal->post($rest);
+        $rest->payment->post($rest);
     });
     // Update Journal Entry
-    $rest->put('/:id', function ($id) use ($rest) {
-        $rest->journal->put($rest, $id);
+    $rest->put('/:type/:trans', function ($type, $trans) use ($rest) {
+        $rest->payment->put($rest, $type, $trans);
     });
-    // Delete Journal Entry
-    $rest->delete('/:type/:id', function ($type, $id) use ($rest) {
-        $rest->journal->delete($rest, $type, $id);
+    // // Delete Journal Entry
+    $rest->delete('/:type/:trans', function ($type, $trans) use ($rest) {
+        $rest->payment->delete($rest, $type, $trans);
     });
 });
-// ------------------------------ Journal -------------------------------
-
+// ------------------------------ Payment -------------------------------
+// ------------------------------ Deposit -------------------------------
+$rest->container->singleton('deposit', function () use ($rest) {
+    return new Deposit();
+});
+$rest->group('/deposit', function () use ($rest) {
+    $rest->post('/', function () use ($rest) {
+        $rest->deposit->post($rest);
+    });
+    $rest->put('/:type/:trans', function ($type, $trans) use ($rest) {
+        $rest->deposit->put($rest, $type, $trans);
+    });
+    $rest->delete('/:type/:trans', function ($type, $trans) use ($rest) {
+        $rest->deposit->delete($rest, $type, $trans);
+    });
+});
+// ------------------------------ Deposit -------------------------------
+// ------------------------------ Account -------------------------------
+$rest->container->singleton('account', function () use ($rest) {
+    return new Account();
+});
+$rest->group('/account', function () use ($rest) {
+    $rest->get('/:type', function ($type) use ($rest) {
+       $rest->account->get($rest, $type);
+    });
+    $rest->get('/balance/:id', function ($id) use ($rest) {
+       $rest->account->getBalance($rest, $id);
+    });
+});
+// ------------------------------ Account -------------------------------
 // Init API
 $rest->run();
