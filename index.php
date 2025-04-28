@@ -26,25 +26,7 @@ Name: SASYS REST API
 Free software under GNU GPL
 ***********************************************/
 
-/**
- * @SWG\Swagger(
- *   host="demo.saygoweb.com",
- *   basePath="/frontaccounting/modules/api",
- *   @SWG\Info(
- *     version="2.4-1.7",
- *     title="Front Accounting Simple API",
- *     description="This is a simple REST API as a Front Accounting module [https://github.com/andresamayadiaz/FrontAccountingSimpleAPI](https://github.com/andresamayadiaz/FrontAccountingSimpleAPI).",
- *     @SWG\License(
- *       name="GPL V2.0",
- *       url="https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html"
- *     )
- *   ),
- *   @SWG\ExternalDocumentation(
- *     description="Find out more about Front Accounting Simple API",
- *     url="https://github.com/andresamayadiaz/FrontAccountingSimpleAPI"
- *   )
- * )
- */
+
 
 ini_set('html_errors', false);
 ini_set('xdebug.show_exception_trace', 0);

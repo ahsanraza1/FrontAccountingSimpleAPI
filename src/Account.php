@@ -1,7 +1,7 @@
 <?php
 namespace FAAPI;
 
-$path_to_root = "../..";
+$path_to_root = "..";
 
 include_once($path_to_root . "/includes/ui/items_cart.inc");
 // include_once($path_to_root . "/gl/includes/db/gl_journal.inc");

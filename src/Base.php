@@ -46,7 +46,7 @@ class Base
        if( !in_array( $_POST["PayType"], [0,2,3,4]) ){
            return [false,api_response(403, ["data"=>["message"=>"Invalid PayType"]])];
        }
-       if( in_array($_POST["PayType"], [2])){
+       if( in_array($_POST["PayType"], [2, 3])){
            if( !isset($_POST["person_id"]) || !isset($_POST["PersonDetailID"]) ){
                return [false,api_response(403, ["data"=>["message"=>"Person detail is missing"] ])];
            }
@@ -68,6 +68,15 @@ class Base
        return [true, true];
     }
 
+    public static function get_voided_entry($type, $type_no)
+    {
+        $sql = "SELECT * FROM ".TB_PREF."voided WHERE type=".db_escape($type)
+            ." AND id=".db_escape($type_no);
+
+        $result = db_query($sql, "could not query voided transaction table");
+
+        return db_num_rows($result);
+    }
     public static function create_cart($type, $trans_no)
     {
         global $Refs;
@@ -83,14 +92,18 @@ class Base
     
             $bank_trans = db_fetch(get_bank_trans($type, $trans_no));
             $_POST['bank_account'] = $_POST['bank_account'];//$bank_trans["bank_act"];
-            $_POST['PayType'] = $bank_trans["person_type_id"];
+            // $_POST['PayType'] = $bank_trans["person_type_id"];
             $cart->reference = $bank_trans["ref"];
             
             if ($bank_trans["person_type_id"] == PT_CUSTOMER)
             {
-                $trans = get_customer_trans($trans_no, $type);	
-                $_POST['person_id'] = $trans["debtor_no"];
-                $_POST['PersonDetailID'] = $trans["branch_code"];
+                if( $_POST['PayType'] != $bank_trans["person_type_id"]){
+
+                }else{
+                    $trans = get_customer_trans($trans_no, $type);	
+                    $_POST['person_id'] = $trans["debtor_no"];
+                    $_POST['PersonDetailID'] = $trans["branch_code"];
+                }
             }
             elseif ($bank_trans["person_type_id"] == PT_SUPPLIER)
             {
@@ -98,8 +111,14 @@ class Base
                 $_POST['person_id'] = $trans["supplier_id"];
             }
             elseif ($bank_trans["person_type_id"] == PT_MISC)
-                $_POST['person_id'] = $bank_trans["person_id"];
-            elseif ($bank_trans["person_type_id"] == PT_QUICKENTRY)
+            {
+                if( $_POST['PayType'] != $bank_trans["person_type_id"]){
+                    $bank_trans["person_id"] = $_POST['person_id'];
+                }else{
+                    $_POST['person_id'] = $bank_trans["person_id"];
+                }
+
+            }elseif ($bank_trans["person_type_id"] == PT_QUICKENTRY)
                 $_POST['person_id'] = $bank_trans["person_id"];
             else 
                 $_POST['person_id'] = $bank_trans["person_id"];
@@ -129,7 +148,10 @@ class Base
             // apply exchange rate
             foreach($cart->gl_items as $line_no => $line)
                 $cart->gl_items[$line_no]->amount *= $ex_rate;
-    
+
+            if( $_POST['PayType'] != $bank_trans["person_type_id"]){
+                $bank_trans["person_type_id"] = $_POST['PayType'];
+            }
         } else {
             // echo json_encode($cart);
             $cart->reference = $Refs->get_next($cart->trans_type, null, $cart->tran_date);

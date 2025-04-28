@@ -1,7 +1,7 @@
 <?php
 namespace FAAPI;
 
-$path_to_root = "../..";
+$path_to_root = "..";
 
 include_once($path_to_root . "/includes/ui/items_cart.inc");
 // include_once($path_to_root . "/gl/includes/db/gl_journal.inc");
@@ -40,7 +40,7 @@ class Payment
             /*6*/ $_POST['PayType'], 
             /*7*/ $_POST['person_id'], 
             /*8*/ get_post('PersonDetailID'),
-            /*9*/ $_POST['ref'], 
+            /*9*/ $_POST['reference'], 
             /*10*/ $_POST['memo_'], 
             /*11*/ true, 
             /*12*/ input_num('settled_amount', 
@@ -53,6 +53,10 @@ class Payment
 
     public function put($rest, $type, $trans)
     {
+        $r = Base::get_voided_entry(ST_BANKPAYMENT, $trans);
+        if( $r > 0 ){
+            return api_response(404,["data"=>["message"=>"Transaction voided already"]]);
+        }
         global $Refs;
         $req = $rest->request();
         $model = $req->post();
@@ -85,34 +89,12 @@ class Payment
 
     public function delete($rest, $type, $trans)
     {
-        $req = $rest->request();
-        $model = $req->post();
-        $_POST = $model;
-        // $cart = $this->create_cart(ST_BANKPAYMENT, 0);
-        $_POST["dimension_id"] = isset( $_POST["dimension_id"] )?isset( $_POST["dimension_id"] ):"";
-        $_POST["dimension2_id"] = isset( $_POST["dimension2_id"] )?isset( $_POST["dimension2_id"] ):"";
-       
-        $cart = Base::create_cart(ST_BANKPAYMENT, $trans);
-        $_SESSION['pay_items']->remove_gl_item(0);
-
-        
-        $id = write_bank_transaction(
-            /*1*/ $_SESSION['pay_items']->trans_type, 
-            /*2*/ $_SESSION['pay_items']->order_id, 
-            /*3*/ $_POST['bank_account'],
-            /*4*/ $_SESSION['pay_items'], 
-            /*5*/ $_POST['date_'],
-            /*6*/ $_POST['PayType'], 
-            /*7*/ $_POST['person_id'], 
-            /*8*/ get_post('PersonDetailID'),
-            /*9*/ $_POST['ref'], 
-            /*10*/ $_POST['memo_'], 
-            /*11*/ true, 
-            /*12*/ input_num('settled_amount', 
-            /*13*/ null
-         ));
-
-        return \api_success_response([$id]);
+        $r = Base::get_voided_entry(ST_BANKPAYMENT, $trans);
+        if( $r > 0 ){
+            return api_response(404,["data"=>["message"=>"Transaction voided already"]]);
+        }
+        $msg = void_transaction($type, $trans, Today(), _("Document void by api."));
+        return api_response(200, ["data"=> ["message"=>"Transaction voided"]]);
     }
 
 }
