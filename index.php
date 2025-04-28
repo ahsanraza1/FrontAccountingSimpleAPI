@@ -2,35 +2,12 @@
 
 use FAAPI\Account;
 use FAAPI\Deposit;
-use FAAPI\Inventory;
-use FAAPI\InventoryLocations;
-use FAAPI\Category;
-use FAAPI\TaxTypes;
-use FAAPI\TaxGroups;
 use FAAPI\Customers;
-use FAAPI\Suppliers;
-use FAAPI\BankAccounts;
-use FAAPI\GLAccounts;
-use FAAPI\Currencies;
-use FAAPI\InventoryCosts;
-use FAAPI\Sales;
 use FAAPI\Dimensions;
-use FAAPI\Journal;
-use FAAPI\ExchangeRates;
-use FAAPI\GLQueries;
 use FAAPI\Payment;
-
-/**********************************************
-Author: Andres Amaya
-Name: SASYS REST API
-Free software under GNU GPL
-***********************************************/
-
-
 
 ini_set('html_errors', false);
 ini_set('xdebug.show_exception_trace', 0);
-// ini_set('xdebug.auto_trace', 2);
 
 include_once('config_api.php');
 
@@ -72,10 +49,6 @@ class JsonToFormData extends \Slim\Middleware
     }
 }
 
-/*
-The order of these 'add' calls is important, the JsonToFormData must be the
-second Middleware called, which means it needs to be added first.
-*/
 $rest->add(new JsonToFormData());
 $rest->add(new \Slim\Middleware\ContentTypes());
 
@@ -93,48 +66,14 @@ $rest->group('/customers', function () use ($rest) {
     $rest->get('/', function () use ($rest) {
         $rest->customers->get($rest);
     });
-    // // Add Customer
-    // $rest->post('/', function () use ($rest) {
-    //     $rest->customers->post($rest);
-    // });
-    // // Edit Customer
-    // $rest->put('/:id', function ($id) use ($rest) {
-    //     $rest->customers->put($rest, $id);
-    // });
-    // // Delete Customer
-    // $rest->delete('/:id', function ($id) use ($rest) {
-    //     $rest->customers->delete($rest, $id);
-    // });
-    // // Get Customer Branches
-    // $rest->get('/:id/branches/', function ($id) use ($rest) {
-    //     $rest->customers->getBranches($rest, $id);
-    // });
 });
 // --------------------------------- Customers --------------------------------
-
-// ------------------------------- Assets -------------------------------
 
 // ----------------------------- Dimensions -----------------------------
 $rest->container->singleton('dimensions', function () {
     return new Dimensions();
 });
 $rest->group('/dimensions', function () use ($rest) {
-    // Get Dimension
-    $rest->get('/:ref', function ($ref) use ($rest) {
-        $rest->dimensions->getById($rest, $ref);
-    });
-    // Insert Dimension
-    $rest->post('/', function () use ($rest) {
-        $rest->dimensions->post($rest);
-    });
-    // Edit Dimension
-    $rest->put('/:ref', function ($ref) use ($rest) {
-        $rest->dimensions->put($rest, $ref);
-    });
-    // Delete Dimension
-    $rest->delete('/:ref', function ($ref) use ($rest) {
-        $rest->dimensions->delete($rest, $ref);
-    });
     // All Dimensions
     $rest->get('/', function () use ($rest) {
         $rest->dimensions->get($rest);
@@ -152,12 +91,12 @@ $rest->group('/payment', function () use ($rest) {
         $rest->payment->post($rest);
     });
     // Update Journal Entry
-    $rest->put('/:type/:trans', function ($type, $trans) use ($rest) {
-        $rest->payment->put($rest, $type, $trans);
+    $rest->put('/:trans', function ($trans) use ($rest) {
+        $rest->payment->put($rest, 1, $trans);
     });
     // // Delete Journal Entry
-    $rest->delete('/:type/:trans', function ($type, $trans) use ($rest) {
-        $rest->payment->delete($rest, $type, $trans);
+    $rest->delete('/:trans', function ( $trans) use ($rest) {
+        $rest->payment->delete($rest, 1, $trans);
     });
 });
 // ------------------------------ Payment -------------------------------
@@ -169,11 +108,11 @@ $rest->group('/deposit', function () use ($rest) {
     $rest->post('/', function () use ($rest) {
         $rest->deposit->post($rest);
     });
-    $rest->put('/:type/:trans', function ($type, $trans) use ($rest) {
-        $rest->deposit->put($rest, $type, $trans);
+    $rest->put('/:trans', function ( $trans) use ($rest) {
+        $rest->deposit->put($rest, 2, $trans);
     });
-    $rest->delete('/:type/:trans', function ($type, $trans) use ($rest) {
-        $rest->deposit->delete($rest, $type, $trans);
+    $rest->delete('/:trans', function ( $trans) use ($rest) {
+        $rest->deposit->delete($rest, 2, $trans);
     });
 });
 // ------------------------------ Deposit -------------------------------
